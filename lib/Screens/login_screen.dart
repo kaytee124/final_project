@@ -1,17 +1,38 @@
 import 'package:final_project/Screens/sign_up.dart';
+import 'package:final_project/services/auth_service.dart';
 import 'package:final_project/utils/appvalidator.dart';
 import 'package:flutter/material.dart';
 
 //ignore_for_file: prefer_const_constructors
-class LoginView extends StatelessWidget {
+class LoginView extends StatefulWidget {
   LoginView({super.key});
-  final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
 
-  void _submitForm() {
+  @override
+  State<LoginView> createState() => _LoginViewState();
+}
+
+class _LoginViewState extends State<LoginView> {
+  final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  var authService = AuthService();
+  var isLoader = false;
+
+  Future<void> _submitForm() async {
     if (_formkey.currentState!.validate()) {
-      ScaffoldMessenger.of(_formkey.currentContext!).showSnackBar(
-        const SnackBar(content: Text('Form submitted successfully')),
-      );
+      setState(() {
+        isLoader = true;
+      });
+      var data = {
+        "email": _emailController.text,
+        "password": _passwordController.text,
+      };
+
+      await authService.login(data, context);
+
+      setState(() {
+        isLoader = false;
+      });
     }
   }
 
@@ -21,7 +42,7 @@ class LoginView extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
-      backgroundColor: Color(0xFF252634),
+      backgroundColor: Color.fromARGB(255, 21, 25, 83),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -43,6 +64,7 @@ class LoginView extends StatelessWidget {
               ),
               SizedBox(height: 50.0),
               TextFormField(
+                controller: _emailController,
                 style: TextStyle(color: Colors.white),
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 decoration: _buildInputDecoration('Username', Icons.person),
@@ -50,8 +72,9 @@ class LoginView extends StatelessWidget {
               ),
               SizedBox(height: 16.0),
               TextFormField(
+                controller: _passwordController,
                 style: TextStyle(color: Colors.white),
-                keyboardType: TextInputType.phone,
+                obscureText: true,
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 decoration: _buildInputDecoration('Password', Icons.lock),
                 validator: appvalidator.validatePassword,
@@ -62,13 +85,21 @@ class LoginView extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromARGB(255, 241, 89, 0),
+                    backgroundColor: Color.fromARGB(255, 8, 8, 8),
                   ),
-                  onPressed: _submitForm,
-                  child: Text(
-                    "Login",
-                    style: TextStyle(color: Colors.white, fontSize: 20),
-                  ),
+                  onPressed: () {
+                    isLoader ? print("Loading") : _submitForm();
+                  },
+                  child:
+                      isLoader
+                          ? Center(child: CircularProgressIndicator())
+                          : Text(
+                            "Login",
+                            style: TextStyle(
+                              color: const Color.fromARGB(255, 255, 254, 254),
+                              fontSize: 20,
+                            ),
+                          ),
                 ),
               ),
               SizedBox(height: 20.0),
@@ -81,7 +112,10 @@ class LoginView extends StatelessWidget {
                 },
                 child: Text(
                   "Signup",
-                  style: TextStyle(color: Color(0xFFF15900), fontSize: 25),
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 252, 250, 249),
+                    fontSize: 25,
+                  ),
                 ),
               ),
             ],
@@ -93,7 +127,7 @@ class LoginView extends StatelessWidget {
 
   InputDecoration _buildInputDecoration(String label, IconData suffixIcon) {
     return InputDecoration(
-      fillColor: Color(0xAA49A59),
+      fillColor: Color.fromARGB(9, 2, 18, 238),
       enabledBorder: OutlineInputBorder(
         borderSide: BorderSide(color: Color(0x35949494)),
       ),

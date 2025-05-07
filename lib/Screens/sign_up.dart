@@ -1,17 +1,49 @@
 import 'package:final_project/Screens/login_screen.dart';
+import 'package:final_project/services/auth_service.dart';
 import 'package:final_project/utils/appvalidator.dart';
 import 'package:flutter/material.dart';
 
 //ignore_for_file: prefer_const_constructors
-class signup extends StatelessWidget {
+class signup extends StatefulWidget {
   signup({super.key});
+
+  @override
+  State<signup> createState() => _signupState();
+}
+
+class _signupState extends State<signup> {
   final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
 
-  void _submitForm() {
+  final _userNameController = TextEditingController();
+
+  final _emailController = TextEditingController();
+
+  final _phoneController = TextEditingController();
+
+  final _passwordController = TextEditingController();
+
+  var authService = AuthService();
+  var isLoader = false;
+
+  Future<void> _submitForm() async {
     if (_formkey.currentState!.validate()) {
-      ScaffoldMessenger.of(_formkey.currentContext!).showSnackBar(
-        const SnackBar(content: Text('Form submitted successfully')),
-      );
+      setState(() {
+        isLoader = true;
+      });
+      var data = {
+        "username": _userNameController.text,
+        "email": _emailController.text,
+        "phone": _phoneController.text,
+        "password": _passwordController.text,
+        'remainingAmount': 0,
+        'totalCredit': 0,
+        'totalDebit': 0,
+      };
+
+      await authService.createUser(data, context);
+      setState(() {
+        isLoader = false;
+      });
     }
   }
 
@@ -19,9 +51,8 @@ class signup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Scaffold(
-      backgroundColor: Color(0xFF252634),
+      backgroundColor: Color.fromARGB(255, 21, 25, 83),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -43,6 +74,7 @@ class signup extends StatelessWidget {
               ),
               SizedBox(height: 50.0),
               TextFormField(
+                controller: _userNameController,
                 style: TextStyle(color: Colors.white),
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 decoration: _buildInputDecoration('Username', Icons.person),
@@ -50,6 +82,7 @@ class signup extends StatelessWidget {
               ),
               SizedBox(height: 16.0),
               TextFormField(
+                controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 style: TextStyle(color: Colors.white),
                 autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -58,6 +91,7 @@ class signup extends StatelessWidget {
               ),
               SizedBox(height: 16.0),
               TextFormField(
+                controller: _phoneController,
                 style: TextStyle(color: Colors.white),
                 keyboardType: TextInputType.phone,
                 autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -66,8 +100,9 @@ class signup extends StatelessWidget {
               ),
               SizedBox(height: 16.0),
               TextFormField(
+                controller: _passwordController,
                 style: TextStyle(color: Colors.white),
-                keyboardType: TextInputType.phone,
+                obscureText: true,
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 decoration: _buildInputDecoration('Password', Icons.lock),
                 validator: appvalidator.validatePassword,
@@ -78,16 +113,21 @@ class signup extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromARGB(255, 241, 89, 0),
+                    backgroundColor: Color.fromARGB(255, 12, 8, 5),
                   ),
-                  onPressed: _submitForm,
-                  child: Text(
-                    "Register",
-                    style: TextStyle(color: Colors.white, fontSize: 20),
-                  ),
+                  onPressed: () {
+                    isLoader ? print("Loading") : _submitForm();
+                  },
+                  child:
+                      isLoader
+                          ? Center(child: CircularProgressIndicator())
+                          : Text(
+                            "Register",
+                            style: TextStyle(color: Colors.white, fontSize: 20),
+                          ),
                 ),
               ),
-              SizedBox(height: 20.0),
+              SizedBox(height: 30.0),
               TextButton(
                 onPressed: () {
                   Navigator.push(
@@ -97,7 +137,10 @@ class signup extends StatelessWidget {
                 },
                 child: Text(
                   "Login",
-                  style: TextStyle(color: Color(0xFFF15900), fontSize: 25),
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 248, 247, 247),
+                    fontSize: 25,
+                  ),
                 ),
               ),
             ],
